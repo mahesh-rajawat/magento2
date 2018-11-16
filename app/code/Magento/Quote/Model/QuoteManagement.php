@@ -347,14 +347,11 @@ class QuoteManagement implements \Magento\Quote\Api\CartManagementInterface
                 \Magento\Payment\Model\Method\AbstractMethod::CHECK_ZERO_TOTAL,
             ]);
             $quote->getPayment()->setQuote($quote);
-
             $data = $paymentMethod->getData();
             $quote->getPayment()->importData($data);
         }
-
         if ($quote->getCheckoutMethod() === self::METHOD_GUEST) {
             $billingAddress = $quote->getBillingAddress();
-            
             $quote->setCustomerId(null);
             $quote->setCustomerEmail($billingAddress->getEmail());
             $quote->setCustomerFirstname($billingAddress->getFirstname());
@@ -363,23 +360,18 @@ class QuoteManagement implements \Magento\Quote\Api\CartManagementInterface
             $quote->setCustomerIsGuest(true);
             $quote->setCustomerGroupId(\Magento\Customer\Api\Data\GroupInterface::NOT_LOGGED_IN_ID);
         }
-
         $this->eventManager->dispatch('checkout_submit_before', ['quote' => $quote]);
-
         $order = $this->submit($quote);
-
         if (null == $order) {
             throw new LocalizedException(
                 __('An error occurred on the server. Please try to place the order again.')
             );
         }
-
         $this->checkoutSession->setLastQuoteId($quote->getId());
         $this->checkoutSession->setLastSuccessQuoteId($quote->getId());
         $this->checkoutSession->setLastOrderId($order->getId());
         $this->checkoutSession->setLastRealOrderId($order->getIncrementId());
         $this->checkoutSession->setLastOrderStatus($order->getStatus());
-
         $this->eventManager->dispatch('checkout_submit_all_after', ['order' => $order, 'quote' => $quote]);
         return $order->getId();
     }
